@@ -1,2 +1,1 @@
-# anykernel
-Android kernel installer.
+# Android kernel installer.
