@@ -23,15 +23,35 @@ ui_print " "
 rm -rf $KHOME
 mkdir -p $KHOME
 unzip $3 -d $KHOME
+cd $KHOME
+
+if [ ! -f $KHOME/boot.img ]; then
+  cp $BLOCK/boot $KHOME/orig-boot.img
+  mkdir -p $KHOME/out ; cd $KHOME/out
+  $KHOME/bin/magiskboot unpack $KHOME/orig-boot.img
+
+  for i in $KHOME/*Image*; do
+    if [ -f $i ]; then
+      KERNEL=$i
+      break
+    fi
+  done
+
+  rm $KHOME/out/kernel ; cp $KERNEL $KHOME/out/kernel
+  if [ ! -f $KHOME/out/kernel ]; then
+    exit 1;
+  fi
+  $KHOME/bin/magiskboot repack $KHOME/orig-boot.img $KHOME/boot.img
+fi
 
 if [ -f $KHOME/boot.img ]; then
   ui_print " Patching boot image ..."
-  cat $KHOME/boot.img > $BLOCK/boot
+  cp $KHOME/boot.img $BLOCK/boot
 fi
 
 echo "progress 1 1" >> $OUTFD
 
 if [ -f $KHOME/dtbo.img ]; then
   ui_print " Patching dtbo image ..."
-  cat $KHOME/dtbo.img > $BLOCK/dtbo
+  cp $KHOME/dtbo.img $BLOCK/dtbo
 fi
